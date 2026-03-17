@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>לוח מטמון — רואים דרך ה-AI</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="favicon.svg" />
+    <link rel="stylesheet" href="styles/app.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="hero">
+        <h1 class="hero-line">
+          <span class="hero-title">לוח מטמון 💎</span>
+          <span class="hero-sep" aria-hidden="true"> — </span>
+          לא משחק <em>נגד</em> AI — מעבדה לראות <strong>איך הוא חושב</strong>
+        </h1>
+      </header>
+
+      <main class="board-area board-area--dashboard">
+        <div class="dashboard-top">
+          <div class="dash-game">
+            <div id="hud" class="scoreboard"></div>
+            <div id="grid-wrap" class="grid-wrap"></div>
+            <p id="status" class="status" aria-live="polite"></p>
+
+            <div class="controls">
+              <p class="controls-title">כיוון שלך (חצים / WASD)</p>
+              <div id="dir-pad" class="dir-pad">
+                <span class="dir-spacer"></span>
+                <button type="button" class="dir-btn" data-dir="UP" title="למעלה">↑</button>
+                <span class="dir-spacer"></span>
+                <button type="button" class="dir-btn" data-dir="LEFT" title="שמאלה">←</button>
+                <span class="dir-spacer"></span>
+                <button type="button" class="dir-btn" data-dir="RIGHT" title="ימינה">→</button>
+                <span class="dir-spacer"></span>
+                <button type="button" class="dir-btn" data-dir="DOWN" title="למטה">↓</button>
+                <span class="dir-spacer"></span>
+              </div>
+              <button type="button" class="btn-reset" id="btn-reset">משחק מחדש</button>
+            </div>
+
+            <div id="messages" class="messages"></div>
+          </div>
+
+          <aside class="dash-weights" aria-labelledby="weights-bar-title">
+            <section class="weights-bar weights-bar--sidebar">
+              <h2 id="weights-bar-title" class="weights-bar-title">משקלי ה-AI</h2>
+              <p class="weights-bar-desc">
+                ברירת מחדל: <strong>2, 1.5, 0.8, 0.25, 0.45</strong>. אחרי כל תור — עדכון (וטוסט אם מופעל).
+              </p>
+              <div id="weights-edit-wrap" class="weights-edit-wrap"></div>
+              <div class="weights-bar-actions weights-bar-actions--compact">
+                <button type="button" class="btn-weight" id="btn-weights-apply">החל</button>
+                <button type="button" class="btn-weight btn-weight-secondary" id="btn-weights-restore-default" title="חזרה לברירת מחדל">
+                  ברירת מחדל
+                </button>
+                <button type="button" class="btn-weight btn-weight-secondary" id="btn-weights-zero">אפס</button>
+                <button type="button" class="btn-weight btn-weight-outline" id="btn-new-game-zero">משחק+מאפס</button>
+              </div>
+
+              <div class="learn-alpha-box">
+                <h3 class="learn-alpha-title">חוזק למידה (α)</h3>
+                <p class="learn-alpha-hint">
+                  אחרי תור: <strong>Δמשקל = α × טעות × פיצ׳ר</strong>. טעות חיובית (= קיבל יותר ממה שחיזה) →
+                  <strong>α תגמול</strong>; טעות שלילית → <strong>α עונש</strong>.
+                </p>
+                <div class="learn-alpha-row">
+                  <label for="alpha-reward">α תגמול (טעות &gt; 0)</label>
+                  <input id="alpha-reward" class="weight-input" type="number" step="0.005" min="0" max="2" dir="ltr" />
+                </div>
+                <div class="learn-alpha-row">
+                  <label for="alpha-penalty">α עונש (טעות &lt; 0)</label>
+                  <input id="alpha-penalty" class="weight-input" type="number" step="0.005" min="0" max="2" dir="ltr" />
+                </div>
+                <div class="learn-alpha-actions">
+                  <button type="button" class="btn-weight btn-weight-secondary" id="btn-alpha-apply">החל α</button>
+                  <button type="button" class="btn-weight-outline btn-alpha-tiny" id="btn-alpha-default">0.03 לשניהם</button>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <div class="panels-stack">
+          <button type="button" class="panel-toggle" id="btn-toggle-think" aria-expanded="false">
+            <span class="panel-toggle-icon">📊</span>
+            <span>איך ה-AI חישב</span>
+            <span class="chevron" aria-hidden="true">▼</span>
+          </button>
+          <div class="panel think collapsible" id="panel-think-wrap">
+            <div id="think-panel"></div>
+          </div>
+
+          <button type="button" class="panel-toggle" id="btn-toggle-learn" aria-expanded="false">
+            <span class="panel-toggle-icon">📚</span>
+            <span>יומן למידה</span>
+            <span class="chevron" aria-hidden="true">▼</span>
+          </button>
+          <div class="panel learn collapsible" id="panel-learn-wrap">
+            <div id="learn-panel"></div>
+          </div>
+
+          <div class="panel-actions">
+            <button type="button" id="btn-calc" class="toggle-btn" aria-expanded="true">
+              החישוב המלא (כל כיוון)
+            </button>
+            <button type="button" id="btn-weights" class="toggle-btn" aria-expanded="false">
+              משקלים (רשימה — כפול)
+            </button>
+          </div>
+          <div id="calc-panel" class="panel calc">
+            <div id="calc-panel-body"></div>
+          </div>
+          <div id="weight-panel" class="panel weights hidden">
+            <div id="weight-panel-body"></div>
+          </div>
+        </div>
+      </main>
+
+      <div id="weight-toast-host" class="weight-toast-host" aria-live="polite"></div>
+
+      <footer class="foot">
+        <p>
+          לוח 5×5 · ε יורד ל־5% · TD γ=0.9 · α ניתן לשינוי · אוצר +10 · מלכודת −10
+          <strong>בתור הקודם</strong> מנצח (+3)
+        </p>
+        <p class="foot-actions">
+          <button type="button" class="link-like" id="btn-restore-weight-toast">
+            להפעיל שוב טוסט «עדכון משקלים» אחרי תור
+          </button>
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
