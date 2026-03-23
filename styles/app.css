@@ -413,26 +413,30 @@ body {
 
 .dir-pad {
   display: grid;
-  grid-template-columns: repeat(3, 52px);
-  gap: 6px;
+  /* Keep physical left/right order correct inside global RTL page */
+  direction: ltr;
+  grid-template-columns: repeat(3, clamp(58px, 16vw, 68px));
+  gap: clamp(8px, 2.6vw, 12px);
   justify-content: center;
   margin-bottom: 0.75rem;
 }
 
 .dir-spacer {
-  min-height: 44px;
+  min-height: clamp(52px, 14vw, 60px);
 }
 
 .dir-btn {
-  width: 52px;
-  height: 44px;
-  font-size: 1.25rem;
-  border: none;
-  border-radius: 8px;
+  width: clamp(58px, 16vw, 68px);
+  height: clamp(52px, 14vw, 60px);
+  font-size: clamp(1.35rem, 5vw, 1.6rem);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
   background: var(--accent);
   color: #fff;
   cursor: pointer;
   font-weight: 700;
+  box-shadow: 0 3px 10px rgba(29, 126, 216, 0.3);
+  touch-action: manipulation;
 }
 
 .dir-btn:hover {
@@ -441,6 +445,12 @@ body {
 
 .dir-btn:active {
   transform: scale(0.97);
+}
+
+.dir-btn:focus-visible {
+  outline: 3px solid rgba(29, 126, 216, 0.35);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(29, 126, 216, 0.45);
 }
 
 .btn-reset {

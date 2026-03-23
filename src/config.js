@@ -35,7 +35,7 @@ export const FEATURE_LABELS = [
 ];
 
 /** משקלים התחלתיים — שינוי איטי (α נמוך) */
-export const INITIAL_WEIGHTS = [2.0, 1.5, 0.45, 0.25, 0.45];
+export const INITIAL_WEIGHTS = [0.01, 0.5, 0.45, 0.25, 0.45];
 
 /** איפוס ל-0 — AI בלי ידע מובנה (רק חקר ε) */
 export const ZERO_WEIGHTS = [0, 0, 0, 0, 0];
