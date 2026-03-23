@@ -48,7 +48,7 @@
             <section class="weights-bar weights-bar--sidebar">
               <h2 id="weights-bar-title" class="weights-bar-title">משקלי ה-AI</h2>
               <p class="weights-bar-desc">
-                ברירת מחדל: <strong>2, 1.5, 0.8, 0.25, 0.45</strong>. אחרי כל תור — עדכון (וטוסט אם מופעל).
+                ברירת מחדל: <strong>0.01, 0.5, 0.45, 0.25, 0.45</strong>. אחרי כל תור — עדכון (וטוסט אם מופעל).
               </p>
               <div id="weights-edit-wrap" class="weights-edit-wrap"></div>
               <div class="weights-bar-actions weights-bar-actions--compact">
@@ -77,6 +77,19 @@
                 <div class="learn-alpha-actions">
                   <button type="button" class="btn-weight btn-weight-secondary" id="btn-alpha-apply">החל α</button>
                   <button type="button" class="btn-weight-outline btn-alpha-tiny" id="btn-alpha-default">0.03 לשניהם</button>
+                </div>
+              </div>
+
+              <div class="learn-alpha-box">
+                <h3 class="learn-alpha-title">מצב עדכון משקלים</h3>
+                <p class="learn-alpha-hint">
+                  גלובלי: כל הפיצ׳רים הפעילים מתעדכנים. ממוקד: רק משקלים רלוונטיים לאירוע (אוצר/מלכודת/מרוץ/חסימה).
+                </p>
+                <div class="learn-alpha-row">
+                  <label for="chk-focused-learning">
+                    <input id="chk-focused-learning" type="checkbox" />
+                    עדכון ממוקד אירוע (ניתן לכבות בכל רגע)
+                  </label>
                 </div>
               </div>
             </section>

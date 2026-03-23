@@ -243,6 +243,11 @@ body {
   color: var(--text);
 }
 
+.learn-alpha-row label input[type="checkbox"] {
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
 .learn-alpha-actions {
   display: flex;
   flex-wrap: wrap;

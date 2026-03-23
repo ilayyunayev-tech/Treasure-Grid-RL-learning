@@ -105,6 +105,7 @@ export function resolveTurn(state, humanDir, aiDir, dirVec) {
 
   const h1 = tryMove(h0, dirVec[humanDir], GRID_SIZE);
   const a1 = tryMove(a0, dirVec[aiDir], GRID_SIZE);
+  const aiStayed = a1.x === a0.x && a1.y === a0.y;
 
   let rh = 0;
   let ra = 0;
@@ -187,6 +188,11 @@ export function resolveTurn(state, humanDir, aiDir, dirVec) {
     messages,
     prevHuman: h0,
     prevAi: a0,
+    aiTrap: aTrap,
+    aiTreasure: aTreasure,
+    sameTreasureCell,
+    aiWonTreasureRace: sameTreasureCell ? ra > 0 : false,
+    aiStayed,
   };
 }
 

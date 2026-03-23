@@ -28,6 +28,10 @@ import {
 } from "./ui.js";
 
 const LEARN_LOG_MAX = 50;
+const LEARNING_MODE = {
+  GLOBAL: "global",
+  FOCUSED: "focused",
+};
 
 const dirVec = {
   UP: { dx: DIRS.UP.dx, dy: DIRS.UP.dy },
@@ -41,6 +45,7 @@ function buildGame() {
   let aiWeights = [...INITIAL_WEIGHTS];
   let alphaReward = DEFAULT_ALPHA_REWARD;
   let alphaPenalty = DEFAULT_ALPHA_PENALTY;
+  let learningMode = LEARNING_MODE.GLOBAL;
   const aiVisited = new Set([`${state.ai.x},${state.ai.y}`]);
   let waiting = true;
   let lastPlan = null;
@@ -112,14 +117,46 @@ function buildGame() {
     }
   }
 
+  function syncLearningModeInput() {
+    const chk = document.getElementById("chk-focused-learning");
+    if (!chk) return;
+    chk.checked = learningMode === LEARNING_MODE.FOCUSED;
+  }
+
+  function inferLearningEvent(res) {
+    if (res.aiTrap) return "trap";
+    if (res.sameTreasureCell) return res.aiWonTreasureRace ? "race_win" : "race_loss";
+    if (res.aiTreasure) return "treasure";
+    if (res.aiStayed) return "blocked";
+    return "neutral";
+  }
+
+  function buildGatesByEvent(eventType) {
+    switch (eventType) {
+      case "trap":
+        return [0, 1, 0, 0, 0];
+      case "treasure":
+        return [1, 0, 0.5, 0, 0];
+      case "race_win":
+      case "race_loss":
+        return [0, 0, 1, 0, 0];
+      case "blocked":
+        return [0, 0, 0, 0, 1];
+      default:
+        return [1, 1, 1, 1, 1];
+    }
+  }
+
   function paint() {
     updateMainView(root, state, aiWeights, lastPlan, lastLearn, els, learnLog, {
       alphaReward,
       alphaPenalty,
       gamma: GAMMA,
+      learningMode,
     });
     syncWeightInputs();
     syncAlphaInputs();
+    syncLearningModeInput();
   }
 
   function fullReset(newWeights) {
@@ -198,9 +235,15 @@ function buildGame() {
       );
       const tdTarget = res.rewardAi + GAMMA * maxNext;
       const error = tdTarget - predicted;
+      const eventType = inferLearningEvent(res);
+      const gates =
+        learningMode === LEARNING_MODE.FOCUSED
+          ? buildGatesByEvent(eventType)
+          : [1, 1, 1, 1, 1];
       const { weights: newW, deltas } = updateWeights(aiWeights, feats, error, {
         alphaReward,
         alphaPenalty,
+        gates,
       });
       aiWeights = newW;
       showWeightUpdateToastIfNeeded(deltas, FEATURE_LABELS, state.turns);
@@ -216,6 +259,9 @@ function buildGame() {
         maxNext,
         tdTarget,
         gamma: GAMMA,
+        learningMode,
+        eventType,
+        gates: [...gates],
       };
 
       const epsThr = Math.round(lastPlan.epsilonEffective * 1000) / 10;
@@ -231,6 +277,9 @@ function buildGame() {
         explore: lastPlan.explore,
         epsThreshold: epsThr,
         gamma: GAMMA,
+        learningMode,
+        eventType,
+        gates: [...gates],
         deltas: deltas.map((d) => ({ ...d })),
       });
       if (learnLog.length > LEARN_LOG_MAX) learnLog.length = LEARN_LOG_MAX;
@@ -281,7 +330,7 @@ function buildGame() {
 
   document.getElementById("btn-weights-restore-default")?.addEventListener("click", () => {
     aiWeights = [...INITIAL_WEIGHTS];
-    setStatus("משקלים חזרו לברירת המחדל (2, 1.5, 0.8, 0.25, 0.45).");
+    setStatus("משקלים חזרו לברירת המחדל (0.01, 0.5, 0.45, 0.25, 0.45).");
     paint();
   });
 
@@ -317,6 +366,17 @@ function buildGame() {
     alphaReward = DEFAULT_ALPHA_REWARD;
     alphaPenalty = DEFAULT_ALPHA_PENALTY;
     setStatus("α חזר ל־0.03 לשניהם.");
+    paint();
+  });
+
+  document.getElementById("chk-focused-learning")?.addEventListener("change", (e) => {
+    const enabled = Boolean(e.target?.checked);
+    learningMode = enabled ? LEARNING_MODE.FOCUSED : LEARNING_MODE.GLOBAL;
+    setStatus(
+      enabled
+        ? "מצב למידה: ממוקד אירוע (אפשר לכבות בצ'קבוקס)."
+        : "מצב למידה: גלובלי (ברירת מחדל)."
+    );
     paint();
   });
 

@@ -39,7 +39,8 @@ export function updateMainView(
     gamma: 0.9,
   }
 ) {
-  const { alphaReward, alphaPenalty, gamma } = learningRates;
+  const { alphaReward, alphaPenalty, gamma, learningMode = "global" } =
+    learningRates;
   const { gridEl, hudEl, msgEl, thinkEl, learnEl, calcEl, weightEl } = flags;
 
   if (gridEl) {
@@ -156,6 +157,10 @@ export function updateMainView(
               · ציון לצעד: <strong>${formatNum(e.predicted)}</strong>
             </div>`
               : "";
+          const modeRow = `<div class="learn-log-entry__row">
+              <strong>מצב עדכון:</strong> ${e.learningMode === "focused" ? "ממוקד" : "גלובלי"}
+              · <strong>אירוע:</strong> ${esc(e.eventType || "neutral")}
+            </div>`;
           return `<article class="learn-log-entry ${idx === 0 ? "learn-log-entry--latest" : ""}" aria-label="תור ${e.turn}">
             <div class="learn-log-entry__head">
               <strong>תור ${e.turn}</strong>
@@ -167,14 +172,19 @@ export function updateMainView(
               · ${esc(errExplain)}
             </div>
             ${tdRow}
+            ${modeRow}
             <div class="learn-log-entry__deltas">${deltasLine}</div>
           </article>`;
         })
         .join("");
     }
+    const modeText =
+      learningMode === "focused"
+        ? "עדכון ממוקד אירוע: רק משקלים רלוונטיים לאירוע מתעדכנים."
+        : "עדכון גלובלי: כל פיצ׳ר פעיל מתעדכן.";
     learnEl.innerHTML = `
       <h3>📚 יומן למידה</h3>
-      <p class="log-formula">טעות TD = (פרס + ${formatNum(gamma)}×מקס׳ ציון מהמצב הבא) − ציון הצעד. עדכון: משקל ← משקל + α×טעות×פיצ׳ר (α₊=${formatNum(alphaReward)} / α₋=${formatNum(alphaPenalty)}). החדש למעלה.</p>
+      <p class="log-formula">טעות TD = (פרס + ${formatNum(gamma)}×מקס׳ ציון מהמצב הבא) − ציון הצעד. עדכון: משקל ← משקל + α×טעות×פיצ׳ר (α₊=${formatNum(alphaReward)} / α₋=${formatNum(alphaPenalty)}). <strong>${modeText}</strong> החדש למעלה.</p>
       <div class="learn-log-scroll" id="learn-log-scroll">${logHtml}</div>
     `;
     const sc = document.getElementById("learn-log-scroll");

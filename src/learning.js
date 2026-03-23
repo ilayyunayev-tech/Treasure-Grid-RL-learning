@@ -13,8 +13,9 @@ export function updateWeights(weights, features, error, opts = {}) {
   const next = [...weights];
   const deltas = [];
   for (let i = 0; i < weights.length; i++) {
+    const gate = Array.isArray(opts.gates) ? Number(opts.gates[i] ?? 0) : 1;
     const old = next[i];
-    const delta = alpha * error * features[i];
+    const delta = alpha * error * features[i] * gate;
     next[i] = old + delta;
     if (Math.abs(delta) > 1e-8) {
       deltas.push({
